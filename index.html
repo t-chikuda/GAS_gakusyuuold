@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+  <html>
+    <body>
+      <?!= HtmlService.createHtmlOutputFromFile('style').getContent(); ?>
+      <h1>ログイン画面</h1>
+      <div class="kakomi1">
+        <div class="id">ID:<input type="text" id="id"></p></div>
+        <div class="pw">PASS:<input type="text" id="pw"></p></div>
+        <button class="login" id="login" onclick="login()">ログイン</button>
+        <button class="signUp" id="signUp" onclick="signUp()">新規登録<br>(エントリー)</button>
+      </div>
+
+      <div id="overlay-for-dialog" class="clearfix"></div>
+      <!-- alert用のダイアログ -->
+      <div id="alert-message" class="dialog" >
+        <div class="alert-content">
+          <p id="alert-message-text"></p>
+        </div>
+        <p id="alert-close" type="button">閉じる</p>
+      </div>
+      <script>
+        // ログイン
+        function login() {
+          var value = document.getElementById("id").value;
+          var value2 = document.getElementById("pw").value;
+          google.script.run
+            .withSuccessHandler(function(results) {
+            google.script.run
+              .withSuccessHandler(function(results) {
+                var url = results;
+                url += '?page=taskList';
+                window.top.location.href = url;
+            })
+            .withFailureHandler(function(error) {
+            })
+            .getScriptUrl();
+          })
+            .withFailureHandler(function(error) {
+                showAlert('IDまたはPASSが異なります。');
+          })
+            .login(value,value2);
+        }
+
+        // 新規登録
+        function signUp() {
+          google.script.run
+            .withSuccessHandler(function(results) {
+               var url = results;
+               url += '?page=userRegistration';
+               window.top.location.href = url;
+          })
+            .withFailureHandler(function(error) {
+          })
+            .getScriptUrl();
+        }
+        
+        // alert用ダイアログの処理
+        var alertClose = document.getElementById('alert-close');
+        var alertDialog = document.getElementById('alert-message');
+        var alertMessage = document.getElementById('alert-message-text');
+
+        /**
+         * アラートを表示する関数
+         * @param {string}   _message     表示するメッセージ
+         * @param {function} resolveParam 「閉じる」ボタンをクリックした際に実行される関数
+         */
+        function showAlert(message, resolveParam) {
+          return new Promise(function(resolve) {
+          alertMessage.innerText = message;
+          enableOverlayForDialog();
+          alertDialog.style.display = 'block';
+          var closeFnc = function() {
+            alertClose.removeEventListener('click', closeFnc);
+            disableOverlayForDialog();
+            alertDialog.style.display = 'none';
+            alertMessage.innerText = '';
+            resolve(resolveParam);
+          }
+          alertClose.addEventListener('click', closeFnc);
+          });
+        };
+
+        /**
+         * ダイアログのオーバーレイを有効化する関数
+         */
+        function enableOverlayForDialog() {
+          document.getElementById('overlay-for-dialog').style.background = 'rgba(0, 0, 0, 0.3)';
+          document.getElementById('overlay-for-dialog').style.display = 'block'; 
+        }
+
+        /**
+         * ダイアログのオーバーレイを無効化する関数
+         */
+        function disableOverlayForDialog() {
+          document.getElementById('overlay-for-dialog').style.background = 'transparent';
+          document.getElementById('overlay-for-dialog').style.display = 'none'; 
+        }
+      </script>
+    </body>
+  </html>
